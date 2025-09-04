@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartDiet - Personalized Indian Diet Recommendation System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .diet-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .diet-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .notification-item {
+            animation: slideIn 0.5s ease;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.8s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        th {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .tab-button {
+            transition: all 0.3s ease;
+        }
+        
+        .tab-button.active {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+    </style>
+</head>
+<body class="min-h-screen py-8 px-4">
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-white mb-2">SmartDiet</h1>
+            <p class="text-white/80 text-lg">Personalized Indian Diet Recommendations</p>
+        </header>
+
+        <!-- Main Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Input Panel -->
+            <div class="glass-effect p-6">
+                <h2 class="text-2xl font-semibold text-white mb-6 text-center">
+                    <i class="fas fa-user-cog mr-2"></i>Your Preferences
+                </h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-white block mb-2">Goal</label>
+                        <select id="goal" class="w-full p-3 rounded-lg bg-white/20 text-black border border-white/30 focus:outline-none focus:ring-2 focus:ring-white/50">
+                            <option value="weight_loss">Weight Loss</option>
+                            <option value="muscle_gain">Muscle Gain</option>
+                            <option value="maintenance">Maintenance</option>
+                            <option value="diabetic">Diabetic Friendly</option>
+                            <option value="vegetarian">Vegetarian</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="text-white block mb-2">Daily Calories</label>
+                        <input type="range" id="calories" min="1200" max="3000" value="2000" class="w-full">
+                        <div class="text-white text-center" id="caloriesValue">2000 kcal</div>
+                    </div>
+                    
+                    <div>
+                        <label class="text-white block mb-2">Diet Type</label>
+                        <select id="dietType" class="w-full p-3 rounded-lg bg-white/20 text-black border border-white/30 focus:outline-none focus:ring-2 focus:ring-white/50">
+                            <option value="north_indian">North Indian</option>
+                            <option value="south_indian">South Indian</option>
+                            <option value="balanced">Balanced Indian</option>
+                            <option value="high_protein">High Protein</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="text-white block mb-2">Duration</label>
+                        <select id="duration" class="w-full p-3 rounded-lg bg-white/20 text-black border border-white/30 focus:outline-none focus:ring-2 focus:ring-white/50">
+                            <option value="1_day">1 Day</option>
+                            <option value="1_week">1 Week</option>
+                            <option value="1_month">1 Month</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="text-white block mb-2">Food Preferences</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <label class="text-white flex items-center">
+                                <input type="checkbox" class="mr-2" value="vegetarian"> Vegetarian
+                            </label>
+                            <label class="text-white flex items-center">
+                                <input type="checkbox" class="mr-2" value="eggetarian"> Eggetarian
+                            </label>
+                            <label class="text-white flex items-center">
+                                <input type="checkbox" class="mr-2" value="non_vegetarian"> Non-Veg
+                            </label>
+                            <label class="text-white flex items-center">
+                                <input type="checkbox" class="mr-2" value="gluten_free"> Gluten Free
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <button id="generatePlan" class="w-full bg-blue-600 hover:bg-blue-700 text-black py-3 rounded-lg font-semibold transition-colors mt-4">
+                        <i class="fas fa-magic mr-2"></i>Generate Diet Plan
+                    </button>
+                </div>
+            </div>
+
+            <!-- Diet Plan Display -->
+            <div class="glass-effect p-6 lg:col-span-2">
+                <h2 class="text-2xl font-semibold text-white mb-6 text-center">
+                    <i class="fas fa-utensils mr-2"></i>Your Indian Diet Plan
+                </h2>
+                
+                <div id="planContainer" class="min-h-96 flex items-center justify-center">
+                    <p class="text-white/70 text-center">Your personalized Indian diet plan will appear here after generating.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- History & Notifications Tabs -->
+        <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- History Section -->
+            <div class="glass-effect p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold text-white">
+                        <i class="fas fa-history mr-2"></i>Diet Plan History
+                    </h2>
+                    <button id="clearHistory" class="text-red-400 hover:text-red-300 text-sm">
+                        <i class="fas fa-trash mr-1"></i>Clear
+                    </button>
+                </div>
+                
+                <div id="historyList" class="space-y-3 max-h-64 overflow-y-auto">
+                    <p class="text-white/70 text-center py-8">No history yet. Generate your first plan!</p>
+                </div>
+            </div>
+
+            <!-- Notifications Section -->
+            <div class="glass-effect p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold text-white">
+                        <i class="fas fa-bell mr-2"></i>Notifications
+                    </h2>
+                    <div>
+                        <span id="notificationCount" class="bg-red-500 text-white text-xs px-2 py-1 rounded-full">0</span>
+                        <button id="clearNotifications" class="text-red-400 hover:text-red-300 text-sm ml-2">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="notificationsList" class="space-y-3 max-h-64 overflow-y-auto">
+                    <p class="text-white/70 text-center py-8">No notifications yet.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="text-center mt-8 text-white/60 text-sm">
+            <p>© 2024 SmartDiet - Your intelligent Indian nutrition companion</p>
+        </footer>
+    </div>
+
+    <script>
+        // Indian Diet plan database with authentic home food items
+        const dietPlans = {
+            weight_loss: {
+                north_indian: [
+                    {
+                        meals: ["Breakfast: Besan chilla with mint chutney (250 kcal)", "Lunch: 2 Roti + Mix vegetable sabzi + Dal (400 kcal)", "Dinner: Brown rice + Chicken curry + Salad (450 kcal)", "Snack: Sprout salad (150 kcal)"],
+                        totalCalories: 1250
+                    },
+                    {
+                        meals: ["Breakfast: Poha with peanuts and lemon (300 kcal)", "Lunch: 2 Jowar roti + Lauki sabzi + Raita (350 kcal)", "Dinner: Grilled fish + Steamed vegetables (400 kcal)", "Snack: Cucumber slices with chaat masala (100 kcal)"],
+                        totalCalories: 1150
+                    }
+                ],
+                south_indian: [
+                    {
+                        meals: ["Breakfast: Idli with sambar (250 kcal)", "Lunch: Brown rice + Rasam + Porial (400 kcal)", "Dinner: Dosa with chutney + Vegetable curry (350 kcal)", "Snack: Buttermilk with ginger (150 kcal)"],
+                        totalCalories: 1150
+                    }
+                ],
+                balanced: [
+                    {
+                        meals: ["Breakfast: Moong dal cheela with tomato chutney (280 kcal)", "Lunch: 2 Roti + Palak paneer + Dal tadka (420 kcal)", "Dinner: Quinoa pulao + Chicken curry + Raita (450 kcal)", "Snack: Fruit chaat (150 kcal)"],
+                        totalCalories: 1300
+                    }
+                ],
+                high_protein: [
+                    {
+                        meals: ["Breakfast: Egg white omelette with vegetables (220 kcal)", "Lunch: Chicken biryani (1 cup) + Raita (480 kcal)", "Dinner: Grilled chicken + Stir-fry vegetables (400 kcal)", "Snack: Greek yogurt with flax seeds (200 kcal)"],
+                        totalCalories: 1300
+                    }
+                ]
+            },
+            muscle_gain: {
+                north_indian: [
+                    {
+                        meals: ["Breakfast: 4 Egg bhurji with 2 roti (500 kcal)", "Lunch: 3 Roti + Chicken curry + Dal makhani (650 kcal)", "Dinner: Brown rice + Fish curry + Vegetable sabzi (600 kcal)", "Snack: Paneer tikka + Lassi (400 kcal)"],
+                        totalCalories: 2150
+                    }
+                ],
+                south_indian: [
+                    {
+                        meals: ["Breakfast: Uttapam with sambar and chutney (450 kcal)", "Lunch: 2 cups Rice + Chicken curry + Rasam (700 kcal)", "Dinner: Dosa with potato filling + Egg curry (550 kcal)", "Snack: Banana smoothie with protein (350 kcal)"],
+                        totalCalories: 2050
+                    }
+                ],
+                balanced: [
+                    {
+                        meals: ["Breakfast: Paratha with curd and pickle (500 kcal)", "Lunch: 3 Roti + Mutton curry + Vegetable sabzi (650 kcal)", "Dinner: Biryani (1.5 cups) + Raita (600 kcal)", "Snack: Mixed nuts and dry fruits (300 kcal)"],
+                        totalCalories: 2050
+                    }
+                ],
+                high_protein: [
+                    {
+                        meals: ["Breakfast: Paneer paratha with butter (550 kcal)", "Lunch: Chicken biryani (2 cups) + Boiled eggs (750 kcal)", "Dinner: Grilled fish + Dal + Roti (600 kcal)", "Snack: Protein shake with banana (350 kcal)"],
+                        totalCalories: 2250
+                    }
+                ]
+            },
+            maintenance: {
+                north_indian: [
+                    {
+                        meals: ["Breakfast: Aloo paratha with curd (400 kcal)", "Lunch: 2 Roti + Rajma + Rice + Salad (550 kcal)", "Dinner: Chicken curry + Naan + Raita (500 kcal)", "Snack: Samosa (2 pieces) with chutney (250 kcal)"],
+                        totalCalories: 1700
+                    }
+                ],
+                south_indian: [
+                    {
+                        meals: ["Breakfast: Dosa with potato masala (350 kcal)", "Lunch: Rice + Sambar + Avial + Papad (600 kcal)", "Dinner: Idiyappam with egg curry (450 kcal)", "Snack: Bonda (2 pieces) with chutney (200 kcal)"],
+                        totalCalories: 1600
+                    }
+                ],
+                balanced: [
+                    {
+                        meals: ["Breakfast: Upma with vegetables (300 kcal)", "Lunch: 2 Roti + Chole + Rice + Salad (550 kcal)", "Dinner: Fish fry + Dal + Roti (450 kcal)", "Snack: Jalebi (2 pieces) with milk (300 kcal)"],
+                        totalCalories: 1600
+                    }
+                ],
+                high_protein: [
+                    {
+                        meals: ["Breakfast: Egg dosa with chutney (400 kcal)", "Lunch: Chicken curry + 3 Roti + Dal (600 kcal)", "Dinner: Paneer butter masala + Naan (500 kcal)", "Snack: Lassi with dry fruits (250 kcal)"],
+                        totalCalories: 1750
+                    }
+                ]
+            },
+            diabetic: {
+                north_indian: [
+                    {
+                        meals: ["Breakfast: Besan chilla with mint chutney (250 kcal)", "Lunch: 2 Multigrain roti + Lauki sabzi + Moong dal (400 kcal)", "Dinner: Brown rice + Chicken stew + Salad (350 kcal)", "Snack: Roasted chana (100 kcal)"],
+                        totalCalories: 1100
+                    }
+                ],
+                south_indian: [
+                    {
+                        meals: ["Breakfast: Ragi dosa with sambar (280 kcal)", "Lunch: Brown rice + Rasam + Beans porial (380 kcal)", "Dinner: Millet roti + Vegetable curry (320 kcal)", "Snack: Buttermilk with fenugreek seeds (120 kcal)"],
+                        totalCalories: 1100
+                    }
+                ],
+                balanced: [
+                    {
+                        meals: ["Breakfast: Moong dal cheela with pudina chutney (260 kcal)", "Lunch: 2 Jowar roti + Bhindi sabzi + Dal (390 kcal)", "Dinner: Quinoa + Fish curry + Salad (340 kcal)", "Snack: Apple with cinnamon (110 kcal)"],
+                        totalCalories: 1100
+                    }
+                ],
+                high_protein: [
+                    {
+                        meals: ["Breakfast: Egg white omelette with vegetables (220 kcal)", "Lunch: Grilled chicken + Salad + Dal (380 kcal)", "Dinner: Paneer tikka + Multigrain roti (350 kcal)", "Snack: Greek yogurt with chia seeds (150 kcal)"],
+                        totalCalories: 1100
+                    }
+                ]
+            },
+            vegetarian: {
+                north_indian: [
+                    {
+                        meals: ["Breakfast: Stuffed paratha with curd (380 kcal)", "Lunch: 3 Roti + Paneer butter masala + Dal fry (520 kcal)", "Dinner: Vegetable pulao + Raita (450 kcal)", "Snack: Samosa with chutney (250 kcal)"],
+                        totalCalories: 1600
+                    }
+                ],
+                south_indian: [
+                    {
+                        meals: ["Breakfast: Masala dosa with sambar (350 kcal)", "Lunch: Rice + Sambar + 3 types porial (550 kcal)", "Dinner: Uttapam with chutney (400 kcal)", "Snack: Banana chips (200 kcal)"],
+                        totalCalories: 1500
+                    }
+                ],
+                balanced: [
+                    {
+                        meals: ["Breakfast: Poha with peanuts and sev (320 kcal)", "Lunch: 2 Roti + Mix vegetable + Dal tadka (480 kcal)", "Dinner: Khichdi with kadhi (420 kcal)", "Snack: Makhana roasted (180 kcal)"],
+                        totalCalories: 1400
+                    }
+                ],
+                high_protein: [
+                    {
+                        meals: ["Breakfast: Chana dal cheela with chutney (350 kcal)", "Lunch: 3 Roti + Chole + Salad (520 kcal)", "Dinner: Paneer curry + Brown rice (430 kcal)", "Snack: Sprout salad with lemon (200 kcal)"],
+                        totalCalories: 1500
+                    }
+                ]
+            }
+        };
+
+        // Weekly and Monthly detailed plans
+        const detailedPlans = {
+            weekly: {
+                weight_loss: [
+                    "Day 1: Detox - Lemon water, Vegetable soups, Herbal teas",
+                    "Day 2: Protein Focus - Lentils, Paneer, Chicken, Eggs",
+                    "Day 3: Fiber Rich - Whole grains, Vegetables, Fruits",
+                    "Day 4: Low Carb - Lean proteins, Green vegetables",
+                    "Day 5: Balanced - Traditional thali with portion control",
+                    "Day 6: Intermittent Fasting - 16:8 pattern with nutrient-dense foods",
+                    "Day 7: Cheat Day - Controlled indulgences with healthy options"
+                ],
+                muscle_gain: [
+                    "Day 1: Chest & Triceps - High protein, Complex carbs",
+                    "Day 2: Back & Biceps - Lean meats, Whole grains",
+                    "Day 3: Leg Day - Extra calories, Protein shakes",
+                    "Day 4: Shoulders - Balanced macros, Healthy fats",
+                    "Day 5: Active Recovery - Light proteins, Vegetables",
+                    "Day 6: Full Body - Maximum protein intake",
+                    "Day 7: Rest Day - Maintenance calories, Hydration"
+                ],
+                maintenance: [
+                    "Monday: Traditional North Indian",
+                    "Tuesday: South Indian Special",
+                    "Wednesday: Protein Focus Day",
+                    "Thursday: Low Glycemic Index Foods",
+                    "Friday: Regional Cuisine Exploration",
+                    "Saturday: Family Feast (Portion Controlled)",
+                    "Sunday: Balanced Home-cooked Meals"
+                ]
+            },
+            monthly: {
+                weight_loss: [
+                    "Week 1: Detox & Foundation - Basic Indian home foods, portion control",
+                    "Week 2: Protein Optimization - Increased dal, paneer, chicken intake",
+                    "Week 3: Carb Cycling - Alternating high and low carb days",
+                    "Week 4: Maintenance & Lifestyle - Sustainable eating patterns"
+                ],
+                muscle_gain: [
+                    "Week 1: Foundation Building - Basic strength training diet",
+                    "Week 2: Calorie Surplus - Increased protein and complex carbs",
+                    "Week 3: Performance Optimization - Pre and post workout nutrition",
+                    "Week 4: Recovery & Growth - Maximum nutrient timing"
+                ],
+                maintenance: [
+                    "Week 1: North Indian Cuisine Focus",
+                    "Week 2: South Indian & Coastal Foods",
+                    "Week 3: Eastern & Western Indian Specialties",
+                    "Week 4: Fusion & Modern Indian Cooking"
+                ]
+            }
+        };
+
+        // Global state
+        let dietHistory = JSON.parse(localStorage.getItem('dietHistory')) || [];
+        let notifications = JSON.parse(localStorage.getItem('notifications')) || [];
+        let currentPlan = null;
+
+        // DOM Elements
+        const caloriesSlider = document.getElementById('calories');
+        const caloriesValue = document.getElementById('caloriesValue');
+        const generateBtn = document.getElementById('generatePlan');
+        const planContainer = document.getElementById('planContainer');
+        const historyList = document.getElementById('historyList');
+        const notificationsList = document.getElementById('notificationsList');
+        const notificationCount = document.getElementById('notificationCount');
+        const clearHistoryBtn = document.getElementById('clearHistory');
+        const clearNotificationsBtn = document.getElementById('clearNotifications');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCaloriesDisplay();
+            loadHistory();
+            loadNotifications();
+        });
+
+        // Event Listeners
+        caloriesSlider.addEventListener('input', updateCaloriesDisplay);
+        generateBtn.addEventListener('click', generateDietPlan);
+        clearHistoryBtn.addEventListener('click', clearHistory);
+        clearNotificationsBtn.addEventListener('click', clearNotifications);
+
+        function updateCaloriesDisplay() {
+            caloriesValue.textContent = `${caloriesSlider.value} kcal`;
+        }
+
+        function generateDietPlan() {
+            const goal = document.getElementById('goal').value;
+            const dietType = document.getElementById('dietType').value;
+            const targetCalories = parseInt(caloriesSlider.value);
+            const duration = document.getElementById('duration').value;
+            
+            // Get selected preferences
+            const preferences = [];
+            document.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
+                preferences.push(cb.value);
+            });
+
+            // Generate plan based on selections
+            let availablePlans = dietPlans[goal]?.[dietType] || dietPlans[goal]?.balanced || dietPlans.weight_loss.balanced;
+            
+            // Random selection from available plans
+            const randomPlan = availablePlans[Math.floor(Math.random() * availablePlans.length)];
+            
+            // Adjust calories based on duration
+            let durationFactor = 1;
+            let detailedPlan = null;
+            
+            if (duration === '1_week') {
+                durationFactor = 7;
+                detailedPlan = detailedPlans.weekly[goal] || detailedPlans.weekly.maintenance;
+            } else if (duration === '1_month') {
+                durationFactor = 30;
+                detailedPlan = detailedPlans.monthly[goal] || detailedPlans.monthly.maintenance;
+            }
+            
+            // Adjust calories (simple scaling)
+            const scaleFactor = targetCalories / randomPlan.totalCalories;
+            const adjustedPlan = {
+                ...randomPlan,
+                meals: randomPlan.meals.map(meal => {
+                    const parts = meal.split('(');
+                    if (parts.length > 1) {
+                        const calories = parseInt(parts[1]);
+                        const adjustedCalories = Math.round(calories * scaleFactor);
+                        return `${parts[0]}(${adjustedCalories} kcal)`;
+                    }
+                    return meal;
+                }),
+                totalCalories: targetCalories * durationFactor,
+                goal: goal,
+                dietType: dietType,
+                preferences: preferences,
+                duration: duration,
+                timestamp: new Date().toISOString(),
+                dailyCalories: targetCalories,
+                detailedPlan: detailedPlan
+            };
+
+            currentPlan = adjustedPlan;
+            displayPlan(adjustedPlan);
+        }
+
+        function displayPlan(plan) {
+            const mealsHtml = plan.meals.map(meal => {
+                const [mealName, mealCalories] = meal.split('(');
+                return `
+                    <tr class="hover:bg-white/5 transition-colors">
+                        <td class="text-white py-3 px-4">${mealName.trim()}</td>
+                        <td class="text-blue-300 py-3 px-4">${mealCalories.trim()}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            let detailedPlanHtml = '';
+            if (plan.detailedPlan && (plan.duration === '1_week' || plan.duration === '1_month')) {
+                detailedPlanHtml = `
+                    <div class="mb-6 p-4 bg-purple-500/20 rounded-lg">
+                        <h4 class="text-purple-300 font-semibold mb-3">${plan.duration.replace('_', ' ').toUpperCase()} DETAILED PLAN</h4>
+                        <div class="space-y-2 text-sm">
+                            ${plan.detailedPlan.map(item => `
+                                <div class="flex items-start">
+                                    <span class="text-purple-400 mr-2 mt-1">•</span>
+                                    <span class="text-purple-200">${item}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            const planHTML = `
+                <div class="bg-white/10 rounded-xl p-6 fade-in">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h3 class="text-xl font-semibold text-white capitalize">${plan.goal.replace('_', ' ')} Plan</h3>
+                            <p class="text-blue-200 text-sm mt-1 capitalize">${plan.dietType.replace('_', ' ')} • ${plan.duration.replace('_', ' ')}</p>
+                        </div>
+                        <span class="bg-green-500 text-white px-4 py-2 rounded-full text-sm font-semibold">
+                            ${plan.dailyCalories} kcal/day
+                        </span>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <h4 class="text-white font-semibold mb-3">Daily Meal Plan</h4>
+                        <div class="bg-white/5 rounded-lg overflow-hidden">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="bg-white/10">
+                                        <th class="text-left text-white py-3 px-4">Indian Meal</th>
+                                        <th class="text-left text-white py-3 px-4">Calories</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${mealsHtml}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    ${detailedPlanHtml}
+                    
+                    ${plan.preferences.length > 0 ? `
+                        <div class="mb-6 p-4 bg-yellow-500/20 rounded-lg">
+                            <h4 class="text-yellow-300 font-semibold mb-2">Food Preferences</h4>
+                            <p class="text-yellow-200 text-sm">Selected: ${plan.preferences.join(', ').replace(/_/g, ' ')}</p>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="mb-4 p-4 bg-blue-500/20 rounded-lg">
+                        <h4 class="text-blue-300 font-semibold mb-2">Plan Summary</h4>
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div class="text-blue-200">
+                                <span class="opacity-70">Total Duration:</span>
+                                <span class="font-semibold ml-2 capitalize">${plan.duration.replace('_', ' ')}</span>
+                            </div>
+                            <div class="text-blue-200">
+                                <span class="opacity-70">Total Calories:</span>
+                                <span class="font-semibold ml-2">${plan.totalCalories} kcal</span>
+                            </div>
+                            <div class="text-blue-200">
+                                <span class="opacity-70">Daily Average:</span>
+                                <span class="font-semibold ml-2">${plan.dailyCalories} kcal</span>
+                            </div>
+                            <div class="text-blue-200">
+                                <span class="opacity-70">Meals per Day:</span>
+                                <span class="font-semibold ml-2">${plan.meals.length}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex space-x-4">
+                        <button onclick="saveToHistory()" class="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold transition-colors">
+                            <i class="fas fa-download mr-2"></i>Save Plan
+                        </button>
+                        <button class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition-colors">
+                            <i class="fas fa-share-alt mr-2"></i>Share
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            planContainer.innerHTML = planHTML;
+        }
+
+        function saveToHistory() {
+            if (!currentPlan) return;
+            
+            const planToSave = {
+                ...currentPlan,
+                id: Date.now(),
+                savedAt: new Date().toISOString()
+            };
+            
+            dietHistory.unshift(planToSave);
+            
+            // Keep only last 15 plans
+            if (dietHistory.length > 15) {
+                dietHistory = dietHistory.slice(0, 15);
+            }
+            
+            localStorage.setItem('dietHistory', JSON.stringify(dietHistory));
+            loadHistory();
+            createNotification(`Indian diet plan saved for ${currentPlan.goal.replace('_', ' ')}!`);
+        }
+
+        function loadHistory() {
+            if (dietHistory.length === 0) {
+                historyList.innerHTML = '<p class="text-white/70 text-center py-8">No history yet. Generate your first plan!</p>';
+                return;
+            }
+            
+            historyList.innerHTML = dietHistory.map(plan => `
+                <div class="notification-item bg-white/5 p-4 rounded-lg cursor-pointer hover:bg-white/10 transition-colors" onclick="loadPlanFromHistory(${plan.id})">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-white font-medium capitalize">${plan.goal.replace('_', ' ')}</span>
+                        <span class="text-blue-400 text-xs">${new Date(plan.timestamp).toLocaleDateString()}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="text-blue-300 capitalize">${plan.dietType.replace('_', ' ')}</span>
+                        <span class="text-green-400">${plan.dailyCalories} kcal/day</span>
+                    </div>
+                    <div class="text-white/60 text-xs mt-2">
+                        ${plan.duration.replace('_', ' ')} • ${plan.preferences.length > 0 ? 'Preferences: ' + plan.preferences.join(', ').replace(/_/g, ' ') : 'No preferences'}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadPlanFromHistory(planId) {
+            const plan = dietHistory.find(p => p.id === planId);
+            if (plan) {
+                currentPlan = plan;
+                displayPlan(plan);
+                createNotification(`Loaded Indian diet plan from history`);
+            }
+        }
+
+        function clearHistory() {
+            if (confirm('Are you sure you want to clear all history?')) {
+                dietHistory = [];
+                localStorage.setItem('dietHistory', JSON.stringify(dietHistory));
+                loadHistory();
+                createNotification('History cleared');
+            }
+        }
+
+        function createNotification(message) {
+            const notification = {
+                id: Date.now(),
+                message: message,
+                timestamp: new Date().toISOString(),
+                read: false
+            };
+            
+            notifications.unshift(notification);
+            
+            // Keep only last 20 notifications
+            if (notifications.length > 20) {
+                notifications = notifications.slice(0, 20);
+            }
+            
+            localStorage.setItem('notifications', JSON.stringify(notifications));
+            loadNotifications();
+        }
+
+        function loadNotifications() {
+            const unreadCount = notifications.filter(n => !n.read).length;
+            notificationCount.textContent = unreadCount;
+            
+            if (notifications.length === 0) {
+                notificationsList.innerHTML = '<p class="text-white/70 text-center py-8">No notifications yet.</p>';
+                return;
+            }
+            
+            notificationsList.innerHTML = notifications.map(notif => `
+                <div class="notification-item ${notif.read ? 'opacity-60' : 'bg-white/5'} p-3 rounded-lg cursor-pointer hover:bg-white/10 transition-colors" onclick="markNotificationAsRead(${notif.id})">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <p class="text-white text-sm">${notif.message}</p>
+                            <p class="text-white/50 text-xs mt-1">${new Date(notif.timestamp).toLocaleString()}</p>
+                        </div>
+                        ${!notif.read ? '<span class="w-2 h-2 bg-red-500 rounded-full ml-2 mt-1"></span>' : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function markNotificationAsRead(notificationId) {
+            notifications = notifications.map(n => 
+                n.id === notificationId ? {...n, read: true} : n
+            );
+            localStorage.setItem('notifications', JSON.stringify(notifications));
+            loadNotifications();
+        }
+
+        function clearNotifications() {
+            if (confirm('Are you sure you want to clear all notifications?')) {
+                notifications = [];
+                localStorage.setItem('notifications', JSON.stringify(notifications));
+                loadNotifications();
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartExercise - Complete Fitness System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            min-height: 100vh;
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .exercise-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .exercise-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .day-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .day-card:hover, .day-card.active {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.2) !important;
+        }
+        
+        .timer-running {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { background-color: rgba(255, 255, 255, 0.1); }
+            50% { background-color: rgba(255, 255, 255, 0.3); }
+            100% { background-color: rgba(255, 255, 255, 0.1); }
+        }
+        
+        .fullscreen-mode {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 2000;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body class="min-h-screen py-8 px-4">
+    <div class="max-w-7xl mx-auto">
+        <!-- Notification Container -->
+        <div id="notification" class="notification hidden">
+            <div class="flex items-center">
+                <i class="fas fa-bell text-blue-500 mr-3"></i>
+                <span id="notificationMessage"></span>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div id="mainContent">
+            <!-- Header -->
+            <header class="text-center mb-8">
+                <h1 class="text-4xl font-bold text-white mb-2">SmartExercise</h1>
+                <p class="text-white/80 text-lg">Complete Fitness & Yoga Recommendation System</p>
+                <nav class="mt-4 flex justify-center space-x-6">
+                    <a href="#input" class="text-white/80 hover:text-white">Plan Generator</a>
+                    <a href="#history" class="text-white/80 hover:text-white">History</a>
+                </nav>
+            </header>
+
+            <!-- Input Section -->
+            <div id="input" class="glass-effect p-6 mb-8">
+                <h2 class="text-2xl font-semibold text-white mb-6 text-center">
+                    <i class="fas fa-user-circle mr-2"></i>Your Fitness Profile
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Personal Information -->
+                    <div class="space-y-4">
+                        <h3 class="text-white font-semibold">Personal Info</h3>
+                        <div>
+                            <label class="text-white block mb-2">Age</label>
+                            <input type="number" id="age" min="15" max="80" value="30" class="w-full p-3 rounded-lg bg-white/20 text-black border border-white/30">
+                        </div>
+                        
+                        <div>
+                            <label class="text-white block mb-2">Gender</label>
+                            <select id="gender" class="w-full p-3 rounded-lg bg-white/20 text-black border border-white/30">
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="text-white block mb-2">Weight (kg)</label>
+                            <input type="number" id="weight" min="40" max="150" value="70" class="w-full p-3 rounded-lg bg-white/20 text-black border border-white/30">
+                        </div>
+                        
+                        <div>
+                            <label class="text-white block mb-2">Height (cm)</label>
+                            <input type="number" id="height" min="140" max="220" value="170" class="w-full p-3 rounded-lg bg-white/20 text-black border border-white/30">
+                        </div>
+                    </div>
+
+                    <!-- Fitness Goals -->
+                    <div class="space-y-4">
+                        <h3 class="text-white font-semibold">Fitness Goals</h3>
+                        <div>
+                            <label class="text-white block mb-2">Goal Type</label>
+                            <select id="fitnessGoal" class="w-full p-3 rounded-lg bg-white/20 text-black border border-white/30">
+                                <option value="weight_loss">Weight Loss</option>
+                                <option value="muscle_gain">Muscle Building</option>
+                                <option value="endurance">Endurance & Cardio</option>
+                                <option value="flexibility">Flexibility & Yoga</option>
+                                <option value="strength">Strength Training</option>
+                                <option value="general">General Fitness</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="text-white block mb-2">Experience Level</label>
+                            <select id="fitnessLevel" class="w-full p-3 rounded-lg bg-white/20 text-black border border-white/30">
+                                <option value="beginner">Beginner</option>
+                                <option value="intermediate">Intermediate</option>
+                                <option value="advanced">Advanced</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="text-white block mb-2">Plan Type</label>
+                            <select id="planType" class="w-full p-3 rounded-lg bg-white/20 text-black border border-white/30">
+                                <option value="daily">Daily Plan</option>
+                                <option value="weekly">Weekly Plan</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="text-white block mb-2">Daily Duration</label>
+                            <select id="duration" class="w-full p-3 rounded-lg bg-white/20 text-black border border-white/30">
+                                <option value="30">30 minutes</option>
+                                <option value="45">45 minutes</option>
+                                <option value="60">60 minutes</option>
+                                <option value="90">90 minutes</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Equipment & Preferences -->
+                    <div class="space-y-4">
+                        <h3 class="text-white font-semibold">Equipment</h3>
+                        <div class="grid grid-cols-1 gap-2">
+                            <label class="text-white flex items-center">
+                                <input type="checkbox" class="mr-2" value="dumbbells" checked> Dumbbells
+                            </label>
+                            <label class="text-white flex items-center">
+                                <input type="checkbox" class="mr-2" value="barbell"> Barbell
+                            </label>
+                            <label class="text-white flex items-center">
+                                <input type="checkbox" class="mr-2" value="resistance_bands"> Resistance Bands
+                            </label>
+                            <label class="text-white flex items-center">
+                                <input type="checkbox" class="mr-2" value="yoga_mat" checked> Yoga Mat
+                            </label>
+                            <label class="text-white flex items-center">
+                                <input type="checkbox" class="mr-2" value="pull_up_bar"> Pull-up Bar
+                            </label>
+                            <label class="text-white flex items-center">
+                                <input type="checkbox" class="mr-2" value="none" checked> Bodyweight Only
+                            </label>
+                        </div>
+
+                        <div class="pt-4">
+                            <label class="text-white block mb-2">Yoga Preference</label>
+                            <select id="yogaPreference" class="w-full p-3 rounded-lg bg-white/20 text-black border border-white/30">
+                                <option value="none">No Yoga</option>
+                                <option value="light">Light Yoga</option>
+                                <option value="moderate">Moderate Yoga</option>
+                                <option value="intensive">Intensive Yoga</option>
+                                <option value="yoga_only">Yoga Only</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Generate Button -->
+                    <div class="space-y-4 flex flex-col justify-center">
+                        <div class="bg-white/10 rounded-lg p-4 text-center">
+                            <p class="text-white mb-2">Your BMI: <span id="bmiValue">22.0</span></p>
+                            <p class="text-white text-sm">(Normal weight: 18.5-24.9)</p>
+                        </div>
+                        <button id="generateExercise" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-lg font-semibold text-lg">
+                            <i class="fas fa-dumbbell mr-2"></i>Generate Exercise Plan
+                        </button>
+                        <button id="viewHistory" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg">
+                            <i class="fas fa-history mr-2"></i>View History
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Plan Display Section -->
+            <div class="glass-effect p-6 mb-8">
+                <h2 class="text-2xl font-semibold text-white mb-6 text-center">
+                    <i class="fas fa-calendar mr-2"></i>Your Exercise Plan
+                </h2>
+                
+                <!-- Weekly Plan Overview -->
+                <div id="weeklyPlanContainer" class="mb-6 hidden">
+                    <h3 class="text-xl font-semibold text-white mb-4">Weekly Schedule</h3>
+                    <div class="grid grid-cols-7 gap-2">
+                        <!-- Days will be populated here -->
+                    </div>
+                </div>
+                
+                <!-- Daily Plan Content -->
+                <div id="dailyPlanContainer">
+                    <div class="bg-white/10 rounded-lg p-4">
+                        <p class="text-white/70 text-center">Your personalized exercise plan will appear here</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- History Section -->
+            <div id="history" class="glass-effect p-6 hidden">
+                <h2 class="text-2xl font-semibold text-white mb-6 text-center">
+                    <i class="fas fa-history mr-2"></i>Exercise History
+                </h2>
+                <div id="historyContainer" class="max-h-96 overflow-y-auto">
+                    <p class="text-white/70 text-center">Your exercise history will appear here</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fullscreen Exercise Mode -->
+        <div id="fullscreenExercise" class="fullscreen-mode hidden">
+            <div class="max-w-4xl mx-auto p-6">
+                <!-- Fullscreen content will be populated here -->
+            </div>
+        </div>
+
+        <!-- Current Exercise Timer -->
+        <div id="currentExerciseTimer" class="fixed bottom-4 right-4 glass-effect p-4 hidden">
+            <div class="flex items-center space-x-3">
+                <div class="text-white">
+                    <div class="text-sm">Current Exercise:</div>
+                    <div class="font-semibold" id="currentExerciseName">Exercise Name</div>
+                </div>
+                <div class="text-2xl font-bold text-white" id="timerDisplay">00:00</div>
+                <div class="flex space-x-2">
+                    <button onclick="startTimer()" class="bg-green-600 text-white px-3 py-1 rounded">
+                        <i class="fas fa-play"></i>
+                    </button>
+                    <button onclick="pauseTimer()" class="bg-yellow-600 text-white px-3 py-1 rounded">
+                        <i class="fas fa-pause"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Complete exercise database with all categories
+        const exerciseDatabase = {
+            weight_loss: {
+                cardio: [
+                    { name: "Running", duration: 1800, intensity: "High", description: "Run at moderate pace for fat burning", type: "cardio" },
+                    { name: "Cycling", duration: 2700, intensity: "Moderate", description: "Steady-state cycling for endurance", type: "cardio" },
+                    { name: "Jump Rope", duration: 1200, intensity: "High", description: "High-intensity interval jumping", type: "cardio" },
+                    { name: "Swimming", duration: 1800, intensity: "Moderate", description: "Full-body cardio workout", type: "cardio" },
+                    { name: "Elliptical Training", duration: 1500, intensity: "Moderate", description: "Low-impact cardio for fat burn", type: "cardio" },
+                    { name: "Stair Climbing", duration: 1800, intensity: "High", description: "Climb stairs continuously for cardio", type: "cardio" },
+                    { name: "HIIT", duration: 1200, intensity: "High", description: "High-intensity interval training", type: "cardio" },
+                    { name: "Rowing", duration: 1800, intensity: "High", description: "Full-body cardio with rowing machine", type: "cardio" },
+                    { name: "Mountain Climbers", duration: 900, intensity: "High", description: "Core-intensive cardio move", type: "cardio" },
+                    { name: "Jumping Jacks", duration: 600, intensity: "Moderate", description: "Classic full-body cardio exercise", type: "cardio" },
+                    { name: "Burpees", duration: 900, intensity: "High", description: "Cardio and strength combined", type: "cardio" },
+                    { name: "Battle Ropes", duration: 900, intensity: "High", description: "Upper-body cardio with ropes", type: "cardio" },
+                    { name: "Boxing", duration: 1800, intensity: "High", description: "Cardio through punch combinations", type: "cardio" },
+                    { name: "Kickboxing", duration: 1800, intensity: "High", description: "Cardio with kicks and punches", type: "cardio" },
+                    { name: "Agility Ladder Drills", duration: 900, intensity: "Moderate", description: "Improve speed and coordination", type: "cardio" },
+                    { name: "Shadow Boxing", duration: 1200, intensity: "Moderate", description: "Light boxing for endurance", type: "cardio" }
+                ],
+                strength: [
+                    { name: "Bodyweight Circuit", duration: 2400, intensity: "Moderate", description: "Push-ups, squats, lunges circuit", type: "strength" },
+                    { name: "Dumbbell Routine", duration: 1800, intensity: "Moderate", description: "Full body dumbbell workout", type: "strength" },
+                    { name: "Resistance Band Training", duration: 1500, intensity: "Moderate", description: "Full body workout using bands", type: "strength" },
+                    { name: "Kettlebell Circuit", duration: 1800, intensity: "High", description: "Kettlebell swings and lifts", type: "strength" },
+                    { name: "Medicine Ball Routine", duration: 1200, intensity: "Moderate", description: "Explosive full-body movements", type: "strength" },
+                    { name: "Push-Up Variations", duration: 900, intensity: "Moderate", description: "Standard, diamond, decline push-ups", type: "strength" },
+                    { name: "Squat Variations", duration: 1200, intensity: "Moderate", description: "Bodyweight and weighted squats", type: "strength" },
+                    { name: "Lunges", duration: 900, intensity: "Moderate", description: "Forward, backward, side lunges", type: "strength" },
+                    { name: "Plank Routine", duration: 900, intensity: "Moderate", description: "Front, side, reverse planks", type: "strength" },
+                    { name: "Deadlifts", duration: 1200, intensity: "High", description: "Dumbbell or barbell deadlifts", type: "strength" },
+                    { name: "Shoulder Press", duration: 900, intensity: "Moderate", description: "Dumbbells or barbell overhead press", type: "strength" },
+                    { name: "Bent Over Rows", duration: 900, intensity: "Moderate", description: "Back strengthening exercise", type: "strength" },
+                    { name: "Tricep Dips", duration: 600, intensity: "Moderate", description: "Bodyweight dips for arms", type: "strength" },
+                    { name: "Bicep Curls", duration: 600, intensity: "Moderate", description: "Dumbbell curls for arms", type: "strength" },
+                    { name: "Glute Bridges", duration: 600, intensity: "Light", description: "Hip and glute strengthening", type: "strength" },
+                    { name: "Step-Ups", duration: 900, intensity: "Moderate", description: "Step onto platform with weights", type: "strength" }
+                ],
+                yoga: [
+                    { name: "Power Yoga", duration: 1500, intensity: "Moderate", description: "Dynamic yoga for weight loss", type: "yoga" },
+                    { name: "Yoga for Flexibility", duration: 1200, intensity: "Light", description: "Stretching and flexibility", type: "yoga" },
+                    { name: "Vinyasa Flow", duration: 1500, intensity: "Moderate", description: "Continuous flowing yoga sequence", type: "yoga" },
+                    { name: "Core Strength Yoga", duration: 1200, intensity: "Moderate", description: "Focus on abdominal and core muscles", type: "yoga" },
+                    { name: "Sun Salutations", duration: 900, intensity: "Light", description: "Warm-up flow for full body", type: "yoga" },
+                    { name: "Yoga for Detox", duration: 1200, intensity: "Moderate", description: "Twisting poses to aid detoxification", type: "yoga" },
+                    { name: "Balance Yoga", duration: 900, intensity: "Light", description: "Focus on stability and balance", type: "yoga" },
+                    { name: "Hatha Yoga", duration: 1500, intensity: "Light", description: "Traditional poses for body and mind", type: "yoga" },
+                    { name: "Pilates Inspired Yoga", duration: 1200, intensity: "Moderate", description: "Core-focused controlled movements", type: "yoga" },
+                    { name: "Gentle Flow", duration: 900, intensity: "Light", description: "Relaxing and restorative flow", type: "yoga" },
+                    { name: "Yoga for Strength", duration: 1500, intensity: "Moderate", description: "Dynamic poses for muscular endurance", type: "yoga" },
+                    { name: "Twist and Detox", duration: 900, intensity: "Light", description: "Twisting poses for digestion", type: "yoga" },
+                    { name: "Yoga for Stress Relief", duration: 1200, intensity: "Light", description: "Breathing and gentle stretches", type: "yoga" },
+                    { name: "Sunrise Flow", duration: 900, intensity: "Light", description: "Morning energizing routine", type: "yoga" },
+                    { name: "Evening Wind Down", duration: 900, intensity: "Light", description: "Relaxing poses for night", type: "yoga" }
+                ]
+            },
+
+            muscle_gain: {
+                cardio: [
+                    { name: "HIIT Sprints", duration: 900, intensity: "High", description: "Short intense sprints for fat burning", type: "cardio" },
+                    { name: "Treadmill Intervals", duration: 1200, intensity: "High", description: "Run fast then walk for recovery", type: "cardio" },
+                    { name: "Stair Sprints", duration: 900, intensity: "High", description: "Explosive stair running", type: "cardio" },
+                    { name: "Jump Rope HIIT", duration: 900, intensity: "High", description: "Fast rope jumps for conditioning", type: "cardio" },
+                    { name: "Cycling Intervals", duration: 1200, intensity: "High", description: "Short bursts of high intensity cycling", type: "cardio" },
+                    { name: "Battle Rope Intervals", duration: 900, intensity: "High", description: "Short bursts with ropes", type: "cardio" },
+                    { name: "Boxing Intervals", duration: 1200, intensity: "High", description: "Alternate fast punches and rest", type: "cardio" },
+                    { name: "Rowing Intervals", duration: 1200, intensity: "High", description: "Row fast and slow alternately", type: "cardio" },
+                    { name: "Shadow Boxing", duration: 900, intensity: "Moderate", description: "Light punches for endurance", type: "cardio" },
+                    { name: "Agility Ladder Drills", duration: 900, intensity: "Moderate", description: "Improve foot speed", type: "cardio" },
+                    { name: "Mountain Climbers", duration: 900, intensity: "High", description: "Core and cardio combined", type: "cardio" },
+                    { name: "Jumping Jacks", duration: 600, intensity: "Moderate", description: "Classic cardio move", type: "cardio" },
+                    { name: "Elliptical Sprints", duration: 1200, intensity: "High", description: "Elliptical with fast pace", type: "cardio" },
+                    { name: "Row Machine", duration: 1800, intensity: "Moderate", description: "Full-body cardio rowing", type: "cardio" },
+                    { name: "Incline Treadmill Run", duration: 1200, intensity: "High", description: "Running uphill on treadmill", type: "cardio" }
+                ],
+                strength: [
+                    { name: "Chest & Triceps", duration: 2700, intensity: "High", description: "Bench press, push-ups, tricep extensions", type: "strength" },
+                    { name: "Back & Biceps", duration: 2700, intensity: "High", description: "Pull-ups, rows, bicep curls", type: "strength" },
+                    { name: "Leg Day", duration: 3000, intensity: "High", description: "Squats, lunges, deadlifts", type: "strength" },
+                    { name: "Shoulders & Core", duration: 2400, intensity: "High", description: "Shoulder press, lateral raises, planks", type: "strength" },
+                    { name: "Dumbbell Full Body", duration: 2400, intensity: "High", description: "Multiple compound exercises", type: "strength" },
+                    { name: "Barbell Complex", duration: 2400, intensity: "High", description: "Deadlift, row, press combo", type: "strength" },
+                    { name: "Push-Up Variations", duration: 1200, intensity: "Moderate", description: "Diamond, incline, decline push-ups", type: "strength" },
+                    { name: "Pull-Up Routine", duration: 1200, intensity: "High", description: "Wide, neutral, close grip pull-ups", type: "strength" },
+                    { name: "Weighted Lunges", duration: 1200, intensity: "High", description: "Lunges with dumbbells", type: "strength" },
+                    { name: "Leg Press", duration: 1200, intensity: "High", description: "Machine leg press for quads and glutes", type: "strength" },
+                    { name: "Deadlifts", duration: 1800, intensity: "High", description: "Barbell deadlifts", type: "strength" },
+                    { name: "Shoulder Press", duration: 1200, intensity: "Moderate", description: "Dumbbell or barbell", type: "strength" },
+                    { name: "Lateral Raises", duration: 900, intensity: "Moderate", description: "Shoulder isolation exercise", type: "strength" },
+                    { name: "Tricep Dips", duration: 900, intensity: "Moderate", description: "Bodyweight dips", type: "strength" },
+                    { name: "Bicep Curls", duration: 900, intensity: "Moderate", description: "Dumbbell curls", type: "strength" }
+                ],
+                yoga: [
+                    { name: "Strength Yoga", duration: 1800, intensity: "Moderate", description: "Yoga poses for muscle engagement", type: "yoga" },
+                    { name: "Power Flow", duration: 1500, intensity: "High", description: "Dynamic strength yoga", type: "yoga" },
+                    { name: "Core Yoga", duration: 1200, intensity: "Moderate", description: "Abdominal and core focused", type: "yoga" },
+                    { name: "Resistance Yoga", duration: 1500, intensity: "Moderate", description: "Bodyweight resistance poses", type: "yoga" },
+                    { name: "Balance & Strength", duration: 1200, intensity: "Moderate", description: "Balance and strength focused", type: "yoga" },
+                    { name: "Hatha Strength", duration: 1500, intensity: "Moderate", description: "Traditional poses for strength", type: "yoga" },
+                    { name: "Dynamic Flow", duration: 1500, intensity: "High", description: "Fast yoga sequence for muscle engagement", type: "yoga" },
+                    { name: "Warrior Sequence", duration: 1200, intensity: "Moderate", description: "Warrior poses for legs and core", type: "yoga" },
+                    { name: "Plank Yoga Series", duration: 900, intensity: "Moderate", description: "Planks and chaturanga variations", type: "yoga" },
+                    { name: "Power Vinyasa", duration: 1500, intensity: "High", description: "Dynamic flow to build strength", type: "yoga" },
+                    { name: "Sun Salutation Advanced", duration: 1200, intensity: "High", description: "Intense sun salutations", type: "yoga" },
+                    { name: "Core & Balance Flow", duration: 1200, intensity: "Moderate", description: "Balance-focused poses", type: "yoga" },
+                    { name: "Strength & Flexibility", duration: 1500, intensity: "Moderate", description: "Combination of strength and stretch", type: "yoga" },
+                    { name: "Advanced Hatha", duration: 1500, intensity: "Moderate", description: "Strength-focused traditional yoga", type: "yoga" },
+                    { name: "Evening Power Flow", duration: 1200, intensity: "Moderate", description: "Strengthening evening session", type: "yoga" }
+                ]
+            },
+
+            endurance: {
+                cardio: [
+                    { name: "Long Distance Run", duration: 3600, intensity: "Moderate", description: "Steady pace long run", type: "cardio" },
+                    { name: "Cycling Endurance", duration: 2700, intensity: "Moderate", description: "Long duration cycling", type: "cardio" },
+                    { name: "Swimming Laps", duration: 1800, intensity: "Moderate", description: "Continuous swimming", type: "cardio" },
+                    { name: "Rowing", duration: 2400, intensity: "High", description: "Full-body endurance workout", type: "cardio" },
+                    { name: "Elliptical Steady", duration: 2700, intensity: "Moderate", description: "Moderate pace elliptical", type: "cardio" },
+                    { name: "Treadmill Run", duration: 3600, intensity: "Moderate", description: "Continuous treadmill run", type: "cardio" },
+                    { name: "Jump Rope Steady", duration: 1800, intensity: "Moderate", description: "Consistent jump rope pace", type: "cardio" },
+                    { name: "Hiking", duration: 3600, intensity: "Moderate", description: "Long-duration outdoor walk", type: "cardio" },
+                    { name: "Stair Climb", duration: 1800, intensity: "Moderate", description: "Steady climbing for endurance", type: "cardio" },
+                    { name: "Swimming Intervals", duration: 1800, intensity: "Moderate", description: "Alternating slow and fast laps", type: "cardio" },
+                    { name: "Cycling Steady", duration: 2700, intensity: "Moderate", description: "Long distance moderate pace", type: "cardio" },
+                    { name: "Light Jogging", duration: 3600, intensity: "Light", description: "Endurance jogging", type: "cardio" },
+                    { name: "Rowing Steady", duration: 2700, intensity: "Moderate", description: "Moderate rowing for endurance", type: "cardio" },
+                    { name: "Hiking Trail", duration: 3600, intensity: "Moderate", description: "Long duration trail hike", type: "cardio" },
+                    { name: "Cardio Circuit", duration: 1800, intensity: "Moderate", description: "Mixed cardio for endurance", type: "cardio" }
+                ],
+                strength: [
+                    { name: "Endurance Circuit", duration: 2100, intensity: "Moderate", description: "High-rep strength training", type: "strength" },
+                    { name: "Bodyweight High Rep", duration: 1800, intensity: "Moderate", description: "Push-ups, squats, lunges high rep", type: "strength" },
+                    { name: "Dumbbell Endurance", duration: 1800, intensity: "Moderate", description: "Light weight, high rep dumbbell routine", type: "strength" },
+                    { name: "Resistance Band Endurance", duration: 1500, intensity: "Moderate", description: "Full body high rep band exercises", type: "strength" },
+                    { name: "Kettlebell Endurance", duration: 1800, intensity: "Moderate", description: "Low weight, high rep kettlebell", type: "strength" },
+                    { name: "Bodyweight Push-Ups", duration: 900, intensity: "Moderate", description: "High rep push-ups for endurance", type: "strength" },
+                    { name: "Bodyweight Squats", duration: 900, intensity: "Moderate", description: "High rep squats for endurance", type: "strength" },
+                    { name: "Lunges Endurance", duration: 900, intensity: "Moderate", description: "High rep lunges", type: "strength" },
+                    { name: "Plank Endurance", duration: 900, intensity: "Moderate", description: "Hold planks longer for endurance", type: "strength" },
+                    { name: "Rowing Strength", duration: 1200, intensity: "Moderate", description: "High rep rowing with dumbbells", type: "strength" },
+                    { name: "Step-Ups High Reps", duration: 900, intensity: "Moderate", description: "Repeated step-ups for endurance", type: "strength" },
+                    { name: "Deadlifts Light Weight", duration: 1200, intensity: "Moderate", description: "Lightweight high rep deadlifts", type: "strength" },
+                    { name: "Shoulder Press Endurance", duration: 900, intensity: "Moderate", description: "High rep shoulder press", type: "strength" },
+                    { name: "Bicep Curl Endurance", duration: 900, intensity: "Moderate", description: "High rep curls", type: "strength" },
+                    { name: "Tricep Kickback Endurance", duration: 900, intensity: "Moderate", description: "High rep tricep kickbacks", type: "strength" }
+                ],
+                yoga: [
+                    { name: "Flow Yoga", duration: 1500, intensity: "Light", description: "Continuous movement for endurance", type: "yoga" },
+                    { name: "Vinyasa Flow Endurance", duration: 1500, intensity: "Moderate", description: "Flow poses for stamina", type: "yoga" },
+                    { name: "Sun Salutations Repetitive", duration: 1200, intensity: "Light", description: "Multiple rounds for endurance", type: "yoga" },
+                    { name: "Balance Flow", duration: 1200, intensity: "Light", description: "Balance and flow yoga", type: "yoga" },
+                    { name: "Gentle Flow", duration: 900, intensity: "Light", description: "Slow continuous movements", type: "yoga" },
+                    { name: "Morning Flow", duration: 900, intensity: "Light", description: "Wake-up routine for stamina", type: "yoga" },
+                    { name: "Core Flow", duration: 1200, intensity: "Moderate", description: "Core engagement in flow", type: "yoga" },
+                    { name: "Dynamic Vinyasa", duration: 1500, intensity: "Moderate", description: "Flow poses for endurance", type: "yoga" },
+                    { name: "Warrior Flow", duration: 1200, intensity: "Moderate", description: "Warrior poses in sequence", type: "yoga" },
+                    { name: "Endurance Stretch", duration: 900, intensity: "Light", description: "Long-held stretches for stamina", type: "yoga" },
+                    { name: "Gentle Balance", duration: 900, intensity: "Light", description: "Slow balance poses", type: "yoga" },
+                    { name: "Sunrise Flow", duration: 900, intensity: "Light", description: "Morning energizing routine", type: "yoga" },
+                    { name: "Evening Flow", duration: 900, intensity: "Light", description: "Relaxing poses at night", type: "yoga" },
+                    { name: "Core & Balance Flow", duration: 1200, intensity: "Moderate", description: "Combination of core and balance", type: "yoga" },
+                    { name: "Endurance Yoga Circuit", duration: 1500, intensity: "Moderate", description: "Circuit style yoga for endurance", type: "yoga" }
+                ]
+            },
+
+            flexibility: {
+                yoga: [
+                    { name: "Yoga Flow", duration: 1800, intensity: "Light", description: "Vinyasa flow for flexibility", type: "yoga" },
+                    { name: "Stretching Routine", duration: 1200, intensity: "Light", description: "Full body stretching", type: "yoga" },
+                    { name: "Mobility Work", duration: 1500, intensity: "Light", description: "Joint mobility exercises", type: "yoga" },
+                    { name: "Yin Yoga", duration: 2400, intensity: "Light", description: "Deep stretch and relaxation", type: "yoga" },
+                    { name: "Gentle Flow", duration: 1200, intensity: "Light", description: "Slow continuous movement", type: "yoga" },
+                    { name: "Dynamic Stretch", duration: 900, intensity: "Light", description: "Dynamic stretching routine", type: "yoga" },
+                    { name: "Hatha Stretch", duration: 1500, intensity: "Light", description: "Traditional poses for flexibility", type: "yoga" },
+                    { name: "Pilates Inspired Stretch", duration: 1200, intensity: "Light", description: "Core and flexibility", type: "yoga" },
+                    { name: "Balance & Stretch", duration: 900, intensity: "Light", description: "Balance-focused stretching", type: "yoga" },
+                    { name: "Sun Salutations", duration: 900, intensity: "Light", description: "Full body warm-up", type: "yoga" },
+                    { name: "Twist Flow", duration: 900, intensity: "Light", description: "Spinal twists and mobility", type: "yoga" },
+                    { name: "Evening Wind Down", duration: 900, intensity: "Light", description: "Relaxing and stretching", type: "yoga" },
+                    { name: "Morning Wake Up Flow", duration: 900, intensity: "Light", description: "Gentle morning routine", type: "yoga" },
+                    { name: "Hip Openers", duration: 900, intensity: "Light", description: "Stretch hips and glutes", type: "yoga" },
+                    { name: "Shoulder Stretch Flow", duration: 900, intensity: "Light", description: "Upper body stretch", type: "yoga" }
+                ]
+            },
+
+            strength: {
+                strength: [
+                    { name: "Power Lifting", duration: 3000, intensity: "High", description: "Heavy weight training", type: "strength" },
+                    { name: "Bodyweight Strength", duration: 2400, intensity: "High", description: "Advanced bodyweight exercises", type: "strength" },
+                    { name: "Kettlebell Workout", duration: 2100, intensity: "High", description: "Full-body kettlebell routine", type: "strength" },
+                    { name: "Dumbbell Full Body", duration: 2400, intensity: "High", description: "Full body dumbbell routine", type: "strength" },
+                    { name: "Barbell Complex", duration: 2400, intensity: "High", description: "Deadlift, row, press combo", type: "strength" },
+                    { name: "Resistance Band Strength", duration: 1800, intensity: "Moderate", description: "Full body band exercises", type: "strength" },
+                    { name: "Push-Up Variations", duration: 1200, intensity: "Moderate", description: "Diamond, incline, decline push-ups", type: "strength" },
+                    { name: "Pull-Up Routine", duration: 1200, intensity: "High", description: "Wide, neutral, close grip pull-ups", type: "strength" },
+                    { name: "Weighted Lunges", duration: 1200, intensity: "High", description: "Lunges with dumbbells", type: "strength" },
+                    { name: "Leg Press", duration: 1200, intensity: "High", description: "Machine leg press for quads and glutes", type: "strength" },
+                    { name: "Deadlifts", duration: 1800, intensity: "High", description: "Barbell deadlifts", type: "strength" },
+                    { name: "Shoulder Press", duration: 1200, intensity: "Moderate", description: "Dumbbell or barbell", type: "strength" },
+                    { name: "Lateral Raises", duration: 900, intensity: "Moderate", description: "Shoulder isolation exercise", type: "strength" },
+                    { name: "Tricep Dips", duration: 900, intensity: "Moderate", description: "Bodyweight dips", type: "strength" },
+                    { name: "Bicep Curls", duration: 900, intensity: "Moderate", description: "Dumbbell curls", type: "strength" },
+                    { name: "Chest Flys", duration: 900, intensity: "Moderate", description: "Dumbbell chest flys", type: "strength" }
+                ]
+            },
+
+            general: {
+                cardio: [
+                    { name: "Mixed Cardio", duration: 1800, intensity: "Moderate", description: "Varied cardio exercises", type: "cardio" },
+                    { name: "Treadmill Run", duration: 1800, intensity: "Moderate", description: "Steady pace running", type: "cardio" },
+                    { name: "Cycling", duration: 1800, intensity: "Moderate", description: "Indoor or outdoor cycling", type: "cardio" },
+                    { name: "Jump Rope", duration: 900, intensity: "Moderate", description: "Full body jump rope exercise", type: "cardio" },
+                    { name: "Rowing", duration: 1800, intensity: "Moderate", description: "Rowing machine workout", type: "cardio" },
+                    { name: "Elliptical", duration: 1800, intensity: "Moderate", description: "Low-impact cardio workout", type: "cardio" },
+                    { name: "Boxing", duration: 1800, intensity: "Moderate", description: "Cardio boxing routine", type: "cardio" },
+                    { name: "Stair Climbing", duration: 900, intensity: "Moderate", description: "Climb stairs for cardio", type: "cardio" },
+                    { name: "Mountain Climbers", duration: 900, intensity: "Moderate", description: "Bodyweight cardio move", type: "cardio" },
+                    { name: "Burpees", duration: 900, intensity: "High", description: "Full body cardio and strength", type: "cardio" }
+                ],
+                strength: [
+                    { name: "Full Body Workout", duration: 2400, intensity: "Moderate", description: "Complete strength training", type: "strength" },
+                    { name: "Bodyweight Exercises", duration: 1800, intensity: "Moderate", description: "Push-ups, squats, lunges", type: "strength" },
+                    { name: "Dumbbell Routine", duration: 1800, intensity: "Moderate", description: "Full body dumbbell workout", type: "strength" },
+                    { name: "Resistance Band Exercises", duration: 1500, intensity: "Moderate", description: "Full body workout with bands", type: "strength" },
+                    { name: "Kettlebell Routine", duration: 1800, intensity: "Moderate", description: "Full body kettlebell exercises", type: "strength" },
+                    { name: "Core Strength", duration: 1200, intensity: "Moderate", description: "Abdominal and lower back exercises", type: "strength" },
+                    { name: "Leg Strength", duration: 1200, intensity: "Moderate", description: "Squats, lunges, leg press", type: "strength" },
+                    { name: "Upper Body Strength", duration: 1200, intensity: "Moderate", description: "Push-ups, pull-ups, dumbbell press", type: "strength" }
+                ],
+                yoga: [
+                    { name: "Balanced Yoga", duration: 1500, intensity: "Light", description: "Well-rounded yoga practice", type: "yoga" },
+                    { name: "Gentle Flow", duration: 1200, intensity: "Light", description: "Relaxing and continuous movement", type: "yoga" },
+                    { name: "Core Yoga", duration: 1200, intensity: "Moderate", description: "Focus on core muscles", type: "yoga" },
+                    { name: "Vinyasa Flow", duration: 1500, intensity: "Moderate", description: "Flowing yoga sequence", type: "yoga" },
+                    { name: "Hatha Yoga", duration: 1500, intensity: "Light", description: "Traditional poses", type: "yoga" },
+                    { name: "Sun Salutations", duration: 900, intensity: "Light", description: "Full body warm-up routine", type: "yoga" },
+                    { name: "Twist Flow", duration: 900, intensity: "Light", description: "Spinal twist sequence", type: "yoga" }
+                ]
+        }
+        };
+
+        // Global variables
+        let currentPlan = null;
+        let currentExercise = null;
+        let timerInterval = null;
+        let timerSeconds = 0;
+        let exerciseHistory = JSON.parse(localStorage.getItem('exerciseHistory')) || [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            calculateBMI();
+            document.getElementById('generateExercise').addEventListener('click', generateExercisePlan);
+            document.getElementById('viewHistory').addEventListener('click', showHistory);
+            
+            // Add event listeners for BMI calculation
+            document.getElementById('weight').addEventListener('input', calculateBMI);
+            document.getElementById('height').addEventListener('input', calculateBMI);
+        });
+
+        function calculateBMI() {
+            const weight = parseFloat(document.getElementById('weight').value);
+            const height = parseFloat(document.getElementById('height').value) / 100; // convert to meters
+            const bmi = weight / (height * height);
+            document.getElementById('bmiValue').textContent = bmi.toFixed(1);
+        }
+
+        function generateExercisePlan() {
+            const age = parseInt(document.getElementById('age').value);
+            const gender = document.getElementById('gender').value;
+            const weight = parseFloat(document.getElementById('weight').value);
+            const height = parseFloat(document.getElementById('height').value);
+            const goal = document.getElementById('fitnessGoal').value;
+            const level = document.getElementById('fitnessLevel').value;
+            const planType = document.getElementById('planType').value;
+            const duration = parseInt(document.getElementById('duration').value);
+            const yogaPreference = document.getElementById('yogaPreference').value;
+            
+            // Get selected equipment
+            const equipment = [];
+            document.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
+                equipment.push(cb.value);
+            });
+
+            // Calculate BMI
+            const heightInMeters = height / 100;
+            const bmi = weight / (heightInMeters * heightInMeters);
+
+            if (planType === 'weekly') {
+                currentPlan = createWeeklyPlan(age, gender, bmi, goal, level, duration, equipment, yogaPreference);
+                displayWeeklyPlan(currentPlan);
+            } else {
+                currentPlan = createDailyPlan(age, gender, bmi, goal, level, duration, equipment, yogaPreference);
+                displayDailyPlan(currentPlan);
+            }
+        }
+
+        function createWeeklyPlan(age, gender, bmi, goal, level, duration, equipment, yogaPreference) {
+            const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+            const weeklyPlan = {};
+            
+            days.forEach(day => {
+                // Vary exercises based on day of week
+                if (day === 'Sunday') {
+                    // Rest day or light activity
+                    weeklyPlan[day] = [
+                        { name: "Rest Day", duration: 0, intensity: "None", description: "Active recovery or complete rest", type: "recovery" }
+                    ];
+                } else if (day === 'Wednesday') {
+                    // Mid-week focus on yoga/flexibility
+                    weeklyPlan[day] = exerciseDatabase[goal].yoga || exerciseDatabase.flexibility.yoga;
+                } else {
+                    // Regular training days
+                    const exercises = [];
+                    
+                    // Add cardio if not yoga only
+                    if (yogaPreference !== 'yoga_only' && exerciseDatabase[goal].cardio) {
+                        exercises.push(...exerciseDatabase[goal].cardio.slice(0, 1));
+                    }
+                    
+                    // Add strength training if not yoga only
+                    if (yogaPreference !== 'yoga_only' && exerciseDatabase[goal].strength) {
+                        exercises.push(...exerciseDatabase[goal].strength.slice(0, 2));
+                    }
+                    
+                    // Add yoga based on preference
+                    if (yogaPreference !== 'none' && exerciseDatabase[goal].yoga) {
+                        exercises.push(...exerciseDatabase[goal].yoga.slice(0, 1));
+                    }
+                    
+                    weeklyPlan[day] = exercises;
+                }
+            });
+
+            return weeklyPlan;
+        }
+
+        function createDailyPlan(age, gender, bmi, goal, level, duration, equipment, yogaPreference) {
+            const exercises = [];
+            
+            // Add exercises based on goal and preferences
+            if (yogaPreference !== 'yoga_only') {
+                if (exerciseDatabase[goal].cardio) {
+                    exercises.push(...exerciseDatabase[goal].cardio.slice(0, 2));
+                }
+                if (exerciseDatabase[goal].strength) {
+                    exercises.push(...exerciseDatabase[goal].strength.slice(0, 2));
+                }
+            }
+            
+            // Add yoga based on preference
+            if (yogaPreference !== 'none' && exerciseDatabase[goal].yoga) {
+                exercises.push(...exerciseDatabase[goal].yoga.slice(0, yogaPreference === 'intensive' ? 2 : 1));
+            }
+
+            return exercises;
+        }
+
+        function displayWeeklyPlan(weeklyPlan) {
+            const weeklyContainer = document.getElementById('weeklyPlanContainer');
+            const dailyContainer = document.getElementById('dailyPlanContainer');
+            
+            // Show weekly overview
+            weeklyContainer.classList.remove('hidden');
+            dailyContainer.innerHTML = '';
+            
+            // Create day cards
+            const daysContainer = weeklyContainer.querySelector('.grid');
+            daysContainer.innerHTML = '';
+            
+            Object.keys(weeklyPlan).forEach(day => {
+                const dayCard = document.createElement('div');
+                dayCard.className = 'day-card bg-white/5 rounded-lg p-3 text-center cursor-pointer';
+                dayCard.innerHTML = `
+                    <h4 class="text-white font-semibold">${day}</h4>
+                    <p class="text-white/70 text-sm">${weeklyPlan[day].length} exercises</p>
+                `;
+                dayCard.onclick = () => showDayPlan(day, weeklyPlan[day]);
+                daysContainer.appendChild(dayCard);
+            });
+            
+            // Show first day by default
+            showDayPlan(Object.keys(weeklyPlan)[0], weeklyPlan[Object.keys(weeklyPlan)[0]]);
+        }
+
+        function displayDailyPlan(dailyPlan) {
+            const weeklyContainer = document.getElementById('weeklyPlanContainer');
+            const dailyContainer = document.getElementById('dailyPlanContainer');
+            
+            weeklyContainer.classList.add('hidden');
+            
+            if (dailyPlan.length === 0) {
+                dailyContainer.innerHTML = '<p class="text-white/70 text-center">No exercises generated for today</p>';
+                return;
+            }
+            
+            let planHTML = `
+                <div class="bg-white/10 rounded-lg p-6">
+                    <h3 class="text-xl font-semibold text-white mb-4">Today's Workout</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            `;
+            
+            dailyPlan.forEach((exercise, index) => {
+                const minutes = Math.floor(exercise.duration / 60);
+                const seconds = exercise.duration % 60;
+                planHTML += `
+                    <div class="exercise-card bg-white/5 rounded-lg p-4">
+                        <h4 class="text-lg font-semibold text-white mb-2">${exercise.name}</h4>
+                        <p class="text-white/70 text-sm mb-2">${exercise.description}</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-white text-sm">${minutes}:${seconds.toString().padStart(2, '0')}</span>
+                            <span class="text-${exercise.intensity === 'High' ? 'red' : exercise.intensity === 'Moderate' ? 'yellow' : 'green'}-400 text-sm">
+                                ${exercise.intensity}
+                            </span>
+                        </div>
+                        <button onclick="startExerciseTimer(${index})" class="w-full bg-blue-600 text-white py-2 rounded-lg mt-3">
+                            Start Exercise
+                        </button>
+                    </div>
+                `;
+            });
+            
+            planHTML += `
+                    </div>
+                    <div class="mt-6 text-center">
+                        <button onclick="saveToHistory()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg">
+                            Save Today's Plan
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            dailyContainer.innerHTML = planHTML;
+        }
+
+        function showDayPlan(day, exercises) {
+            const dailyContainer = document.getElementById('dailyPlanContainer');
+            
+            if (exercises.length === 0) {
+                dailyContainer.innerHTML = `<p class="text-white/70 text-center">${day} is a rest day</p>`;
+                return;
+            }
+            
+            let planHTML = `
+                <div class="bg-white/10 rounded-lg p-6">
+                    <h3 class="text-xl font-semibold text-white mb-4">${day}'s Workout</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            `;
+            
+            exercises.forEach((exercise, index) => {
+                const minutes = Math.floor(exercise.duration / 60);
+                const seconds = exercise.duration % 60;
+                planHTML += `
+                    <div class="exercise-card bg-white/5 rounded-lg p-4">
+                        <h4 class="text-lg font-semibold text-white mb-2">${exercise.name}</h4>
+                        <p class="text-white/70 text-sm mb-2">${exercise.description}</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-white text-sm">${minutes}:${seconds.toString().padStart(2, '0')}</span>
+                            <span class="text-${exercise.intensity === 'High' ? 'red' : exercise.intensity === 'Moderate' ? 'yellow' : 'green'}-400 text-sm">
+                                ${exercise.intensity}
+                            </span>
+                        </div>
+                        <button onclick="startExerciseTimer(${index}, '${day}')" class="w-full bg-blue-600 text-white py-2 rounded-lg mt-3">
+                            Start Exercise
+                        </button>
+                    </div>
+                `;
+            });
+            
+            planHTML += `
+                    </div>
+                </div>
+            `;
+            
+            dailyContainer.innerHTML = planHTML;
+            
+            // Update active day card
+            document.querySelectorAll('.day-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        function startExerciseTimer(exerciseIndex, day = null) {
+            let exercise;
+            if (day && currentPlan[day]) {
+                exercise = currentPlan[day][exerciseIndex];
+            } else if (Array.isArray(currentPlan)) {
+                exercise = currentPlan[exerciseIndex];
+            } else {
+                return;
+            }
+            
+            currentExercise = exercise;
+            timerSeconds = exercise.duration;
+            
+            // Show timer
+            const timerElement = document.getElementById('currentExerciseTimer');
+            document.getElementById('currentExerciseName').textContent = exercise.name;
+            updateTimerDisplay();
+            timerElement.classList.remove('hidden');
+            
+            // Start timer
+            startTimer();
+        }
+
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            
+            timerInterval = setInterval(() => {
+                if (timerSeconds > 0) {
+                    timerSeconds--;
+                    updateTimerDisplay();
+                } else {
+                    clearInterval(timerInterval);
+                    showNotification('Exercise completed! Great job!');
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timerSeconds / 60);
+            const seconds = timerSeconds % 60;
+            document.getElementById('timerDisplay').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            document.getElementById('notificationMessage').textContent = message;
+            notification.classList.remove('hidden');
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.classList.add('hidden'), 300);
+            }, 3000);
+        }
+
+        function showHistory() {
+            const historySection = document.getElementById('history');
+            const historyContainer = document.getElementById('historyContainer');
+            
+            historySection.classList.remove('hidden');
+            
+            if (exerciseHistory.length === 0) {
+                historyContainer.innerHTML = '<p class="text-white/70 text-center">No exercise history yet</p>';
+                return;
+            }
+            
+            let historyHTML = '<div class="space-y-3">';
+            exerciseHistory.forEach(entry => {
+                historyHTML += `
+                    <div class="bg-white/5 rounded-lg p-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-white font-semibold">${entry.date}</span>
+                            <span class="text-white/70 text-sm">${entry.exercises.length} exercises</span>
+                        </div>
+                        <p class="text-white/70 text-sm">Goal: ${entry.goal}</p>
+                    </div>
+                `;
+            });
+            historyHTML += '</div>';
+            
+            historyContainer.innerHTML = historyHTML;
+        }
+
+        function saveToHistory() {
+            const historyEntry = {
+                date: new Date().toLocaleDateString(),
+                goal: document.getElementById('fitnessGoal').value,
+                exercises: Array.isArray(currentPlan) ? currentPlan : Object.values(currentPlan).flat()
+            };
+            
+            exerciseHistory.unshift(historyEntry);
+            localStorage.setItem('exerciseHistory', JSON.stringify(exerciseHistory));
+            showNotification('Exercise plan saved to history!');
+        }
+    </script>
+</body>
+</html>

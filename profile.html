@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile | MediScope</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="script.js" defer></script>
+</head>
+<body class="bg-gray-50">
+    <!-- Same header as index.html -->
+    <header class="bg-blue-600 text-white shadow-md">
+        <!-- Include header from index.html -->
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">My Profile</h2>
+            <button onclick="window.history.back()" class="flex items-center text-blue-600 hover:text-blue-800">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                </svg>
+                Back
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="md:col-span-1">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex flex-col items-center">
+                        <div class="h-24 w-24 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-3xl font-bold mb-4" id="profileAvatar">
+                            <!-- Avatar will be dynamically inserted -->
+                        </div>
+                        <h3 class="text-xl font-semibold" id="profileName"></h3>
+                        <p class="text-gray-600 text-sm" id="profileEmail"></p>
+                        <p class="text-gray-500 text-xs mt-1" id="memberSince"></p>
+                    </div>
+                    
+                    <div class="mt-6 space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Phone:</span>
+                            <span id="profilePhone" class="font-medium"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Age:</span>
+                            <span id="profileAge" class="font-medium"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Gender:</span>
+                            <span id="profileGender" class="font-medium"></span>
+                        </div>
+                    </div>
+                    
+                    <button id="editProfileBtn" class="w-full mt-6 py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
+                        Edit Profile
+                    </button>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-md p-6 mt-6">
+                    <h3 class="font-semibold mb-3">Health Summary</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm font-medium text-gray-700">Current BMI</span>
+                                <span class="text-sm font-medium" id="currentBmi"></span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div id="bmiProgress" class="h-2.5 rounded-full"></div>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1" id="bmiCategory"></p>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm font-medium text-gray-700">Diet Compliance</span>
+                                <span class="text-sm font-medium" id="dietCompliance">0%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div id="dietProgress" class="h-2.5 rounded-full bg-green-500" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm font-medium text-gray-700">Exercise Compliance</span>
+                                <span class="text-sm font-medium" id="exerciseCompliance">0%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div id="exerciseProgress" class="h-2.5 rounded-full bg-blue-500" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="md:col-span-2">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-xl font-semibold mb-4">Edit Profile Information</h3>
+                    
+                    <form id="profileForm" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="editName" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                                <input type="text" id="editName" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                            </div>
+                            <div>
+                                <label for="editEmail" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                <input type="email" id="editEmail" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="editPhone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                                <input type="tel" id="editPhone" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                            </div>
+                            <div>
+                                <label for="editAge" class="block text-sm font-medium text-gray-700 mb-1">Age</label>
+                                <input type="number" id="editAge" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                            <div class="flex space-x-4">
+                                <label class="flex items-center">
+                                    <input type="radio" name="gender" value="male" class="h-4 w-4 text-blue-600">
+                                    <span class="ml-2 text-gray-700">Male</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="gender" value="female" class="h-4 w-4 text-blue-600">
+                                    <span class="ml-2 text-gray-700">Female</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="gender" value="other" class="h-4 w-4 text-blue-600">
+                                    <span class="ml-2 text-gray-700">Other</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="pt-4 border-t">
+                            <h4 class="font-medium mb-2">Change Password</h4>
+                            <div class="space-y-3">
+                                <div>
+                                    <label for="currentPassword" class="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+                                    <input type="password" id="currentPassword" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                                </div>
+                                <div>
+                                    <label for="newPassword" class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                                    <input type="password" id="newPassword" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                                </div>
+                                <div>
+                                    <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+                                    <input type="password" id="confirmPassword" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-end space-x-3 pt-4">
+                            <button type="button" id="cancelEditBtn" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                                Cancel
+                            </button>
+                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                                Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-md p-6 mt-6">
+                    <h3 class="text-xl font-semibold mb-4">Connected Devices</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between p-3 border rounded-lg">
+                            <div class="flex items-center space-x-3">
+                                <div class="p-2 bg-blue-100 rounded-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium">Fitness Tracker</h4>
+                                    <p class="text-sm text-gray-500">Last synced: <span id="lastSynced">2 hours ago</span></p>
+                                </div>
+                            </div>
+                            <button class="text-red-600 hover:text-red-800 text-sm font-medium">
+                                Disconnect
+                            </button>
+                        </div>
+                        
+                        <div class="flex items-center justify-between p-3 border rounded-lg">
+                            <div class="flex items-center space-x-3">
+                                <div class="p-2 bg-green-100 rounded-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium">Smart Scale</h4>
+                                    <p class="text-sm text-gray-500">Not connected</p>
+                                </div>
+                            </div>
+                            <button class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                Connect
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Check authentication
+        document.addEventListener('DOMContentLoaded', () => {
+            const storedUser = localStorage.getItem('currentUser');
+            if (!storedUser) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            const user = JSON.parse(storedUser);
+            initProfilePage(user);
+        });
+
+        function initProfilePage(user) {
+            // Profile display elements
+            const profileAvatar = document.getElementById('profileAvatar');
+            const profileName = document.getElementById('profileName');
+            const profileEmail = document.getElementById('profileEmail');
+            const memberSince = document.getElementById('memberSince');
+            const profilePhone = document.getElementById('profilePhone');
+            const profileAge = document.getElementById('profileAge');
+            const profileGender = document.getElementById('profileGender');
+            const currentBmi = document.getElementById('currentBmi');
+            const bmiProgress = document.getElementById('bmiProgress');
+            const bmiCategory = document.getElementById('bmiCategory');
+            const dietCompliance = document.getElementById('dietCompliance');
+            const dietProgress = document.getElementById('dietProgress');
+            const exerciseCompliance = document.getElementById('exerciseCompliance');
+            const exerciseProgress = document.getElementById('exerciseProgress');
+            
+            // Form elements
+            const editName = document.getElementById('editName');
+            const editEmail = document.getElementById('editEmail');
+            const editPhone = document.getElementById('editPhone');
+            const editAge = document.getElementById('editAge');
+            const genderRadios = document.querySelectorAll('input[name="gender"]');
+            const currentPassword = document.getElementById('currentPassword');
+            const newPassword = document.getElementById('newPassword');
+            const confirmPassword = document.getElementById('confirmPassword');
+            const profileForm = document.getElementById('profileForm');
+            const editProfileBtn = document.getElementById('editProfileBtn');
+            const cancelEditBtn = document.getElementById('cancelEditBtn');
+            
+            // Load profile data
+            loadProfileData(user);
+            calculateHealthMetrics(user);
+            
+            // Set up event listeners
+            editProfileBtn.addEventListener('click', () => {
+                profileForm.classList.remove('hidden');
+                editProfileBtn.classList.add('hidden');
+            });
+            
+            cancelEditBtn.addEventListener('click', () => {
+                profileForm.classList.add('hidden');
+                editProfileBtn.classList.remove('hidden');
+                loadProfileData(user); // Reset form
+            });
+            
+            profileForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                saveProfileChanges(user);
+            });
+            
+            function loadProfileData(user) {
+                // Basic info
+                const firstName = user.name.split(' ')[0];
+                profileAvatar.textContent = firstName.charAt(0).toUpperCase();
+                profileName.textContent = user.name;
+                profileEmail.textContent = user.email;
+                memberSince.textContent = `Member since ${formatDate(user.createdAt || new Date().toISOString())}`;
+                profilePhone.textContent = user.phone || 'Not provided';
+                profileAge.textContent = user.age || 'Not provided';
+                profileGender.textContent = user.gender ? user.gender.charAt(0).toUpperCase() + user.gender.slice(1) : 'Not provided';
+                
+                // Form fields
+                editName.value = user.name;
+                editEmail.value = user.email;
+                editPhone.value = user.phone || '';
+                editAge.value = user.age || '';
+                
+                if (user.gender) {
+                    document.querySelector(`input[name="gender"][value="${user.gender}"]`).checked = true;
+                }
+            }
+            
+            function calculateHealthMetrics(user) {
+                // BMI data
+                if (user.bmiHistory && user.bmiHistory.length > 0) {
+                    const latestBmi = user.bmiHistory[user.bmiHistory.length - 1].bmi;
+                    currentBmi.textContent = latestBmi.toFixed(1);
+                    
+                    // Set BMI progress bar color based on category
+                    let bmiColor, category;
+                    if (latestBmi < 18.5) {
+                        bmiColor = 'bg-yellow-500';
+                        category = 'Underweight';
+                    } else if (latestBmi < 25) {
+                        bmiColor = 'bg-green-500';
+                        category = 'Normal weight';
+                    } else if (latestBmi < 30) {
+                        bmiColor = 'bg-orange-500';
+                        category = 'Overweight';
+                    } else {
+                        bmiColor = 'bg-red-500';
+                        category = 'Obese';
+                    }
+                    
+                    bmiProgress.className = `h-2.5 rounded-full ${bmiColor}`;
+                    bmiProgress.style.width = `${Math.min(100, (latestBmi / 40) * 100)}%`;
+                    bmiCategory.textContent = category;
+                } else {
+                    currentBmi.textContent = 'Not calculated';
+                    bmiProgress.style.width = '0%';
+                }
+                
+                // Diet compliance
+                if (user.dietPlan) {
+                    const completedMeals = countCompletedItems(user.dietPlan, 'meals');
+                    const totalMeals = countTotalItems(user.dietPlan, 'meals');
+                    const compliance = totalMeals > 0 ? Math.round((completedMeals / totalMeals) * 100) : 0;
+                    
+                    dietCompliance.textContent = `${compliance}%`;
+                    dietProgress.style.width = `${compliance}%`;
+                }
+                
+                // Exercise compliance
+                if (user.exercisePlan) {
+                    const completedWorkouts = countCompletedItems(user.exercisePlan, 'workouts');
+                    const totalWorkouts = countTotalItems(user.exercisePlan, 'workouts');
+                    const compliance = totalWorkouts > 0 ? Math.round((completedWorkouts / totalWorkouts) * 100) : 0;
+                    
+                    exerciseCompliance.textContent = `${compliance}%`;
+                    exerciseProgress.style.width = `${compliance}%`;
+                }
+            }
+            
+            function countCompletedItems(plan, itemType) {
+                return plan.reduce((count, day) => {
+                    return count + day[itemType].filter(item => item.completed).length;
+                }, 0);
+            }
+            
+            function countTotalItems(plan, itemType) {
+                return plan.reduce((count, day) => {
+                    return count + day[itemType].length;
+                }, 0);
+            }
+            
+            function formatDate(dateString) {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-US', {
+                    month: 'long',
+                    year: 'numeric'
+                });
+            }
+            
+            function saveProfileChanges(user) {
+                // Basic info
+                user.name = editName.value;
+                user.email = editEmail.value;
+                user.phone = editPhone.value;
+                user.age = editAge.value;
+                user.gender = document.querySelector('input[name="gender"]:checked')?.value;
+                
+                // Password change if provided
+                if (currentPassword.value && newPassword.value && confirmPassword.value) {
+                    if (currentPassword.value !== user.password) {
+                        alert('Current password is incorrect');
+                        return;
+                    }
+                    
+                    if (newPassword.value !== confirmPassword.value) {
+                        alert('New passwords do not match');
+                        return;
+                    }
+                    
+                    if (newPassword.value.length < 6) {
+                        alert('Password must be at least 6 characters');
+                        return;
+                    }
+                    
+                    user.password = newPassword.value;
+                }
+                
+                // Save to localStorage
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                
+                // Update UI
+                loadProfileData(user);
+                profileForm.classList.add('hidden');
+                editProfileBtn.classList.remove('hidden');
+                
+                // Clear password fields
+                currentPassword.value = '';
+                newPassword.value = '';
+                confirmPassword.value = '';
+                
+                alert('Profile updated successfully!');
+            }
+        }
+
+        // Add this function to show diet history in profile
+        function loadDietHistory() {
+            const dietHistory = JSON.parse(localStorage.getItem('dietHistory') || '[]');
+            const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            
+            const userDietHistory = dietHistory.filter(entry => {
+                // Filter by user if you have user-specific history
+                return entry.userId === user.id || !entry.userId; // include older entries without userId
+            });
+            
+            const historyContainer = document.getElementById('dietHistoryContainer');
+            if (!historyContainer) return;
+            
+            if (userDietHistory.length === 0) {
+                historyContainer.innerHTML = '<p class="text-gray-500 text-center py-4">No diet history found</p>';
+                return;
+            }
+            
+            historyContainer.innerHTML = userDietHistory.slice(0, 10).map(entry => `
+                <div class="border-b pb-4 mb-4">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h4 class="font-semibold">${entry.plan.name}</h4>
+                            <p class="text-sm text-gray-600">${new Date(entry.date).toLocaleDateString()}</p>
+                            <p class="text-sm text-gray-500">${entry.plan.dailyCalories} calories • ${entry.progress || 0}% complete</p>
+                        </div>
+                        <span class="px-2 py-1 text-xs rounded-full ${entry.completed ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}">
+                            ${entry.completed ? 'Completed' : 'In Progress'}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Call this function when the profile page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDietHistory();
+        });
+
+    </script>
+</body>
+</html>

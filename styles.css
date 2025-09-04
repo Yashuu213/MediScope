@@ -1,0 +1,63 @@
+/* Base styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: #333;
+}
+
+/* Header styles */
+header {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Feature buttons */
+.feature-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.feature-btn svg {
+    flex-shrink: 0;
+}
+
+/* Modal styles */
+#authModal {
+    transition: opacity 0.3s ease;
+}
+
+/* Notification badge */
+#notificationBadge {
+    box-shadow: 0 0 0 2px white;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .header-container {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .header-container > div {
+        width: 100%;
+    }
+    
+    #searchBar {
+        width: 100%;
+        margin: 10px 0;
+    }
+    
+    .button-container {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .feature-btn {
+        width: 100%;
+    }
+}

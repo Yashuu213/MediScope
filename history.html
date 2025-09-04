@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health History | MediScope</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js" defer></script>
+</head>
+<body class="bg-gray-50">
+    <!-- Same header as index.html -->
+    <header class="bg-blue-600 text-white shadow-md">
+        <!-- Include header from index.html -->
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">Health History</h2>
+            <button onclick="window.history.back()" class="flex items-center text-blue-600 hover:text-blue-800">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                </svg>
+                Back
+            </button>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h3 class="text-xl font-semibold mb-4">BMI History</h3>
+            <div class="h-64">
+                <canvas id="bmiChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-xl font-semibold mb-4">Recent Diet Compliance</h3>
+                <div class="h-64">
+                    <canvas id="dietChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-xl font-semibold mb-4">Recent Exercise Compliance</h3>
+                <div class="h-64">
+                    <canvas id="exerciseChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-xl font-semibold mb-4">Health Records</h3>
+            
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200" id="healthRecords">
+                        <!-- Records will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div id="noRecords" class="text-center py-12">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <p class="mt-2 text-gray-500">No health records found</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Check authentication
+        document.addEventListener('DOMContentLoaded', () => {
+            const storedUser = localStorage.getItem('currentUser');
+            if (!storedUser) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            const user = JSON.parse(storedUser);
+            initHistoryPage(user);
+        });
+
+        function initHistoryPage(user) {
+            const bmiChartCtx = document.getElementById('bmiChart').getContext('2d');
+            const dietChartCtx = document.getElementById('dietChart').getContext('2d');
+            const exerciseChartCtx = document.getElementById('exerciseChart').getContext('2d');
+            const healthRecords = document.getElementById('healthRecords');
+            const noRecords = document.getElementById('noRecords');
+            
+            let bmiChart, dietChart, exerciseChart;
+            
+            // Load BMI history chart
+            if (user.bmiHistory && user.bmiHistory.length > 0) {
+                renderBmiChart(user.bmiHistory);
+            }
+            
+            // Load diet compliance history
+            if (user.dietHistory) {
+                renderDietChart(user.dietHistory);
+            }
+            
+            // Load exercise compliance history
+            if (user.exerciseHistory) {
+                renderExerciseChart(user.exerciseHistory);
+            }
+            
+            // Load health records
+            loadHealthRecords(user);
+            
+            function renderBmiChart(bmiHistory) {
+                const dates = bmiHistory.map(record => 
+                    new Date(record.date).toLocaleDateString('en-US', {month: 'short', day: 'numeric'})
+                );
+                const bmis = bmiHistory.map(record => record.bmi);
+                
+                if (bmiChart) {
+                    bmiChart.destroy();
+                }
+                
+                bmiChart = new Chart(bmiChartCtx, {
+                    type: 'line',
+                    data: {
+                        labels: dates,
+                        datasets: [{
+                            label: 'BMI',
+                            data: bmis,
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.3,
+                            fill: true,
+                            pointBackgroundColor: '#3b82f6',
+                            pointRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                suggestedMin: Math.max(0, Math.min(...bmis) - 5),
+                                suggestedMax: Math.max(...bmis) + 5
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+            }
+            
+            function renderDietChart(dietHistory) {
+                const dates = dietHistory.map(record => 
+                    new Date(record.date).toLocaleDateString('en-US', {month: 'short', day: 'numeric'})
+                );
+                const compliance = dietHistory.map(record => record.compliance);
+                
+                if (dietChart) {
+                    dietChart.destroy();
+                }
+                
+                dietChart = new Chart(dietChartCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: dates,
+                        datasets: [{
+                            label: 'Diet Compliance',
+                            data: compliance,
+                            backgroundColor: 'rgba(16, 185, 129, 0.6)',
+                            borderColor: 'rgba(16, 185, 129, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                title: {
+                                    display: true,
+                                    text: 'Percentage'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+            }
+            
+            function renderExerciseChart(exerciseHistory) {
+                const dates = exerciseHistory.map(record => 
+                    new Date(record.date).toLocaleDateString('en-US', {month: 'short', day: 'numeric'})
+                );
+                const compliance = exerciseHistory.map(record => record.compliance);
+                
+                if (exerciseChart) {
+                    exerciseChart.destroy();
+                }
+                
+                exerciseChart = new Chart(exerciseChartCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: dates,
+                        datasets: [{
+                            label: 'Exercise Compliance',
+                            data: compliance,
+                            backgroundColor: 'rgba(99, 102, 241, 0.6)',
+                            borderColor: 'rgba(99, 102, 241, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                title: {
+                                    display: true,
+                                    text: 'Percentage'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+            }
+            
+            function loadHealthRecords(user) {
+                // Combine all types of records
+                const records = [];
+                
+                // Add BMI records
+                if (user.bmiHistory) {
+                    user.bmiHistory.forEach(record => {
+                        records.push({
+                            date: record.date,
+                            type: 'BMI Measurement',
+                            details: `BMI: ${record.bmi.toFixed(1)} (Weight: ${record.weight}kg, Height: ${record.height}cm)`,
+                            status: 'Completed'
+                        });
+                    });
+                }
+                
+                // Add diet records
+                if (user.dietHistory) {
+                    user.dietHistory.forEach(record => {
+                        records.push({
+                            date: record.date,
+                            type: 'Diet Plan',
+                            details: `Compliance: ${record.compliance}% (${record.completedMeals}/${record.totalMeals} meals)`,
+                            status: record.compliance >= 80 ? 'Excellent' : 
+                                   record.compliance >= 50 ? 'Good' : 'Needs Improvement'
+                        });
+                    });
+                }
+                
+                // Add exercise records
+                if (user.exerciseHistory) {
+                    user.exerciseHistory.forEach(record => {
+                        records.push({
+                            date: record.date,
+                            type: 'Exercise Plan',
+                            details: `Compliance: ${record.compliance}% (${record.completedWorkouts}/${record.totalWorkouts} workouts)`,
+                            status: record.compliance >= 80 ? 'Excellent' : 
+                                   record.compliance >= 50 ? 'Good' : 'Needs Improvement'
+                        });
+                    });
+                }
+                
+                // Add notifications as records
+                const notifications = JSON.parse(localStorage.getItem('healthPortalNotifications')) || [];
+                notifications.filter(n => n.userId === user.id).forEach(notification => {
+                    records.push({
+                        date: notification.date,
+                        type: 'System Notification',
+                        details: notification.message,
+                        status: notification.seen ? 'Viewed' : 'Unread'
+                    });
+                });
+                
+                // Sort records by date (newest first)
+                records.sort((a, b) => new Date(b.date) - new Date(a.date));
+                
+                // Display records
+                if (records.length > 0) {
+                    noRecords.classList.add('hidden');
+                    
+                    records.forEach(record => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                ${formatDate(record.date)}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                ${record.type}
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-500">
+                                ${record.details}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                    ${getStatusColor(record.status)}">
+                                    ${record.status}
+                                </span>
+                            </td>
+                        `;
+                        healthRecords.appendChild(row);
+                    });
+                } else {
+                    noRecords.classList.remove('hidden');
+                }
+            }
+            
+            function formatDate(dateString) {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                });
+            }
+            
+            function getStatusColor(status) {
+                switch(status.toLowerCase()) {
+                    case 'completed':
+                    case 'excellent':
+                        return 'bg-green-100 text-green-800';
+                    case 'good':
+                        return 'bg-blue-100 text-blue-800';
+                    case 'viewed':
+                        return 'bg-gray-100 text-gray-800';
+                    case 'needs improvement':
+                        return 'bg-yellow-100 text-yellow-800';
+                    case 'unread':
+                        return 'bg-red-100 text-red-800';
+                    default:
+                        return 'bg-gray-100 text-gray-800';
+                }
+            }
+        }
+        
+    </script>
+</body>
+</html>
