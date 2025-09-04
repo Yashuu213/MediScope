@@ -1,6 +1,6 @@
 1️⃣ Medi Scope – AI Powered Health Assistant
 
-🔗 Medi Scope Repository
+🔗 Medi Scope Repository :-https://github.com/Yashuu213/MediScope
 
 A web-based personal health assistant with multiple smart features:
 
@@ -22,7 +22,7 @@ A web-based personal health assistant with multiple smart features:
 
 2️⃣ Disease Diagnosis System – AI Symptom Checker
 
-🔗 Disease Diagnosis Repository
+🔗 Disease Diagnosis Repository :-https://github.com/Yashuu213/Recommendation-Prediction-System
 
 An AI-powered diagnosis tool that predicts possible diseases based on symptoms.
 
