@@ -22,7 +22,7 @@ A web-based personal health assistant with multiple smart features:
 
 2️⃣ Disease Diagnosis System – AI Symptom Checker
 
-🔗 Disease Diagnosis Repository :-https://github.com/Yashuu213/Recommendation-Prediction-System
+🔗 Disease Diagnosis Repository :-https://github.com/Yashuu213/Healthcare-recommendation-system-
 
 An AI-powered diagnosis tool that predicts possible diseases based on symptoms.
 
